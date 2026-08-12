@@ -50,7 +50,7 @@ def prepare_dataset(year, dataset_id):
     output_path = OUTPUT_DIR / f"trec_dl_{year}.csv"
     data_df.to_csv(output_path, index=False, encoding="utf-8")
 
-    # 各クエリのコーパスサイズを計算
+    # 各クエリのコーパスサイズを算出
     corpus_sizes = data_df.groupby("query_id").size()
 
     print(f" Queries: {len(queries_df)}")

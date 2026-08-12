@@ -5,6 +5,7 @@ from pathlib import Path
 DATASETS = {"2019": Path("data/trec_dl_2019.csv"),
             "2020": Path("data/trec_dl_2020.csv")}
 
+# bgeのトークナイザーを使用
 TOKENIZER_NAME = "BAAI/bge-m3"
 OUTPUT_DIR = Path("statistics")
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -14,8 +15,9 @@ def calculate_statistics(data_df, tokenizer):
     document_lengths = []
 
     for _, row in data_df.iterrows():
+        # タイトル＋スペース＋本文を文書とする        
         document = row['title'] + " " + row['body']
-        document_lengths.append(len(tokenizer.encode(document)))
+        document_lengths.append(len(tokenizer.tokenize(document)))
 
     data_df = data_df.copy()
     data_df["document_length"] = document_lengths
@@ -37,16 +39,19 @@ def calculate_statistics(data_df, tokenizer):
                            "min_document_length": lengths.min(),
                            "max_document_length": lengths.max(),
                            "mean_document_length": lengths.mean(),
-                           "variance_document_length": lengths.var(ddof=0)})
-
-    return pd.DataFrame(statistics)
+                           "std_document_length": lengths.std(ddof=0)})
+                
+    output = pd.DataFrame(statistics)
+    
+    return output
 
 
 def main():
     tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_NAME)
 
     for year, input_path in DATASETS.items():
-        data_df = pd.read_csv(input_path)
+        # タイトルが空欄の行もあるため，空欄は欠損値扱いしない
+        data_df = pd.read_csv(input_path, keep_default_na=False)
         statistics_df = calculate_statistics(data_df, tokenizer)
 
         output_path = OUTPUT_DIR / f"trec_dl_{year}_statistics.csv"

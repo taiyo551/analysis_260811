@@ -10,5 +10,5 @@ conda activate ir_datasets
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
-
+requirements.txtにおいて，pytorchはcudaのバージョンに合わせる必要があります．
 
